@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Traducteur de Symboles</title>
+
+<!-- Balises PWA / installation Android -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#202024">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Symboles">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#202024; --card:#2a2a2f; --text:#e8e5df; --muted:#9a978f;
+    --accent:#c47046; --accent-soft:rgba(196,112,70,.14);
+    --accent2:#7ba8b8; --accent2-soft:rgba(123,168,184,.14);
+    --border:rgba(232,229,223,.12);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:var(--bg); color:var(--text);
+    font-family:'Chakra Petch',system-ui,sans-serif;
+    min-height:100vh; padding:calc(1.5rem + env(safe-area-inset-top)) 1rem calc(2rem + env(safe-area-inset-bottom));
+    background-image:radial-gradient(ellipse 80% 50% at 50% -10%, rgba(196,112,70,.10), transparent 60%);
+  }
+  .wrap{max-width:720px;margin:0 auto}
+  header{text-align:center;margin-bottom:1.5rem}
+  .eyebrow{letter-spacing:.35em;text-transform:uppercase;font-size:.7rem;color:var(--accent);margin-bottom:.6rem}
+  h1{font-size:clamp(1.5rem,5vw,2.2rem);font-weight:700;letter-spacing:.02em}
+  h1 .hl{color:var(--accent)}
+  .sub{color:var(--muted);margin-top:.5rem;font-size:.9rem}
+
+  .notice{
+    margin:1rem auto 0; max-width:540px;
+    background:var(--accent2-soft); border:1px solid var(--accent2);
+    color:var(--text); border-radius:10px; padding:.6rem 1rem;
+    font-size:.82rem; text-align:center; line-height:1.5;
+  }
+  .notice b{color:var(--accent2)}
+
+  .card{
+    background:var(--card); border:1px solid var(--border); border-radius:14px;
+    padding:1.2rem; box-shadow:0 1px 3px rgba(0,0,0,.3); margin-top:1.3rem;
+  }
+
+  .field-label{font-size:.72rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin:0 0 .4rem .1rem}
+  textarea{
+    width:100%; min-height:100px; resize:vertical;
+    background:var(--bg); color:var(--text); border:1px solid var(--border);
+    border-radius:10px; padding:.85rem 1rem; font-family:'Chakra Petch',monospace;
+    font-size:1.1rem; line-height:1.6; outline:none; transition:border-color .18s;
+  }
+  textarea:focus{border-color:var(--accent)}
+
+  .out{
+    margin-top:1rem; background:var(--bg); border:1px solid var(--border);
+    border-radius:10px; padding:.85rem 1rem; min-height:64px;
+    font-family:'Chakra Petch',monospace; font-size:1.25rem; line-height:1.7;
+    word-break:break-all;
+  }
+  .out .mapped{color:var(--accent);font-weight:600}
+  .out .kept{color:var(--muted)}
+  .out:empty::before{content:"Le résultat s'affichera ici…";color:var(--muted);font-size:.9rem}
+
+  .actions{display:flex;gap:.55rem;margin-top:.9rem;flex-wrap:wrap;align-items:center}
+  .btn{
+    cursor:pointer;font-family:inherit;font-weight:600;font-size:.85rem;
+    padding:.55rem 1rem;border-radius:9px;border:1px solid var(--border);
+    background:var(--bg);color:var(--text);display:inline-flex;align-items:center;gap:.45rem;
+    transition:all .15s ease;
+  }
+  .btn:hover{border-color:var(--accent);color:var(--accent)}
+  .btn:active{transform:translateY(1px)}
+  .btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .btn.primary{background:var(--accent-soft);border-color:var(--accent)}
+  .hint{margin-left:auto;color:var(--muted);font-size:.75rem}
+
+  .ref{margin-top:1.8rem}
+  .ref h2{font-size:.78rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:1rem;text-align:center}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:.55rem}
+  .pair{
+    background:var(--card);border:1px solid var(--border);border-radius:10px;
+    padding:.65rem .4rem;text-align:center;font-family:'Chakra Petch',monospace;
+    transition:transform .15s ease, border-color .15s;
+  }
+  .pair:active{transform:translateY(-2px);border-color:var(--accent2)}
+  .pair.wide{grid-column:1 / -1; background:var(--accent-soft); border-color:var(--accent)}
+  .pair .a{font-size:1.15rem;font-weight:700;color:var(--text)}
+  .pair .b{font-size:1.15rem;font-weight:700;color:var(--accent)}
+  .pair.wide .a, .pair.wide .b{font-size:1.4rem}
+  .pair .sep{color:var(--accent2);margin:0 .35rem;font-weight:400}
+
+  footer{margin-top:2rem;text-align:center;color:var(--muted);font-size:.75rem;line-height:1.6}
+  footer .install{margin-top:.6rem;display:inline-block;background:var(--accent-soft);border:1px solid var(--accent);color:var(--text);padding:.35rem .8rem;border-radius:8px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Chiffrement par substitution</div>
+    <h1>Traducteur de <span class="hl">Symboles</span></h1>
+    <p class="sub">Correspondance symétrique — un seul passage, les deux sens</p>
+    <div class="notice">
+      <b>Chiffres, lettres et séquences mélangés acceptés.</b><br>
+      Les séquences <b>FH</b> et <b>WLAN</b> sont reconnues en priorité,
+      puis chaque caractère isolé est remplacé par son équivalent.
+    </div>
+  </header>
+
+  <div class="card">
+    <div class="field-label">Entrée (chiffres, lettres et/ou séquences)</div>
+    <textarea id="input" placeholder="Exemple : FH 123 WLAN…" spellcheck="false" autocomplete="off"></textarea>
+
+    <div class="field-label" style="margin-top:1rem">Résultat</div>
+    <div class="out" id="output" aria-live="polite"></div>
+
+    <div class="actions">
+      <button class="btn primary" id="copyBtn" title="Copier le résultat">
+        <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Copier
+      </button>
+      <button class="btn" id="clearBtn" title="Effacer">
+        <svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>
+        Effacer
+      </button>
+      <span class="hint" id="countHint"></span>
+    </div>
+  </div>
+
+  <div class="ref">
+    <h2>Table de correspondance (symétrique)</h2>
+    <div class="grid" id="mapGrid"></div>
+  </div>
+
+  <footer>
+    Traduction en direct, sans aucun calcul — substitution caractère par caractère et séquences.<br>
+    Appliquer deux fois la traduction redonne l'original.
+    <span class="install">Installation : menu du navigateur → Ajouter à l'écran d'accueil</span>
+  </footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var MAP = {
+    'FH':'WLAN', 'WLAN':'FH',
+    '0':'F','F':'0', '1':'E','E':'1', '2':'D','D':'2', '3':'C','C':'3',
+    '4':'B','B':'4', '5':'A','A':'5', '6':'9','9':'6', '7':'8','8':'7'
+  };
+  var TOKENS = Object.keys(MAP).sort(function(a,b){ return b.length - a.length; });
+  var PAIRS = [['FH','WLAN'],['0','F'],['1','E'],['2','D'],['3','C'],['4','B'],['5','A'],['6','9'],['7','8']];
+
+  var input    = document.getElementById('input');
+  var output   = document.getElementById('output');
+  var copyBtn  = document.getElementById('copyBtn');
+  var clearBtn = document.getElementById('clearBtn');
+  var countHint= document.getElementById('countHint');
+  var mapGrid  = document.getElementById('mapGrid');
+
+  function translateSegments(text){
+    var segments = [];
+    var matchedChars = 0;
+    var i = 0;
+    while (i < text.length){
+      var matched = false;
+      for (var t = 0; t < TOKENS.length; t++){
+        var tok = TOKENS[t];
+        if (text.substr(i, tok.length) === tok){
+          segments.push({ text: MAP[tok], mapped: true });
+          matchedChars += tok.length;
+          i += tok.length;
+          matched = true;
+          break;
+        }
+      }
+      if (!matched){
+        segments.push({ text: text.charAt(i), mapped: false });
+        i++;
+      }
+    }
+    return { segments: segments, matchedChars: matchedChars };
+  }
+
+  function plainResult(segments){
+    var s = '';
+    for (var i = 0; i < segments.length; i++) s += segments[i].text;
+    return s;
+  }
+
+  var lastResult = '';
+
+  function render(){
+    var res = translateSegments(input.value);
+    output.textContent = '';
+    res.segments.forEach(function(seg){
+      var span = document.createElement('span');
+      span.textContent = seg.text;
+      span.className = seg.mapped ? 'mapped' : 'kept';
+      output.appendChild(span);
+    });
+    lastResult = plainResult(res.segments);
+    var total = input.value.length;
+    countHint.textContent = total ? (res.matchedChars + ' traduit(s) sur ' + total) : '';
+  }
+
+  clearBtn.addEventListener('click', function(){
+    input.value = ''; render(); input.focus();
+  });
+
+  copyBtn.addEventListener('click', function(){
+    if (!lastResult){ return; }
+    function done(){
+      copyBtn.lastChild.textContent = ' Copié !';
+      setTimeout(function(){ copyBtn.lastChild.textContent = ' Copier'; }, 1200);
+    }
+    function fallback(){
+      var ta = document.createElement('textarea');
+      ta.value = lastResult; document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); done(); } catch(e){}
+      document.body.removeChild(ta);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(lastResult).then(done, fallback);
+    } else { fallback(); }
+  });
+
+  input.addEventListener('input', render);
+
+  PAIRS.forEach(function(p, idx){
+    var div = document.createElement('div');
+    div.className = 'pair' + (idx === 0 ? ' wide' : '');
+    var a = document.createElement('span'); a.className='a';   a.textContent = p[0];
+    var s = document.createElement('span'); s.className='sep'; s.textContent = '↔';
+    var b = document.createElement('span'); b.className='b';   b.textContent = p[1];
+    div.appendChild(a); div.appendChild(s); div.appendChild(b);
+    mapGrid.appendChild(div);
+  });
+
+  render();
+})();
+
+// Enregistrement du Service Worker (fonctionnement hors ligne + installation)
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('sw.js').catch(function(){});
+  });
+}
+</script>
+</body>
+</html>

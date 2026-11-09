@@ -1,0 +1,29 @@
+===== TRADUCTEUR DE SYMBOLES — Application Android (PWA) =====
+
+Contenu du dossier :
+  index.html     l'application (fonctionne aussi seule dans un navigateur)
+  manifest.json  déclaration d'application installable
+  sw.js          mise en cache pour le hors-ligne
+  icon-192.png / icon-512.png   icône de l'application
+
+INSTALLATION SUR ANDROID (2 méthodes) :
+
+Méthode 1 — Hébergement gratuit (recommandée, permet l'installation) :
+  1. Allez sur https://app.netlify.com/drop (ou https://pages.github.com)
+  2. Glissez-déposez ce dossier entier sur la page.
+  3. Vous obtenez une adresse https://…
+  4. Ouvrez cette adresse dans Chrome sur votre téléphone Android.
+  5. Menu (⋮) → "Ajouter à l'écran d'accueil" / "Installer l'application".
+  6. L'icône apparaît sur votre écran d'accueil : lancement en plein écran,
+     fonctionne hors connexion après la première ouverture.
+
+Méthode 2 — Sans hébergement :
+  Copiez simplement index.html sur votre téléphone et ouvrez-le avec
+  Chrome ou le gestionnaire de fichiers. L'application fonctionne,
+  mais sans l'icône sur l'écran d'accueil (mode navigateur).
+
+Si vous voulez un vrai fichier .apk :
+  Sur un PC, installez Android Studio, créez un projet "Empty Activity",
+  remplacez le contenu par une WebView chargeant index.html (placée dans
+  assets/), puis compilez un APK. Je peux vous fournir le code source
+  complet de ce projet WebView sur demande.
